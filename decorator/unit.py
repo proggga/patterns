@@ -1,11 +1,37 @@
 
 class UnitInterface(object):
 
-    def __init__(self):
-        self.x = None
-        self.health = None
-        self.damage = None
-        self.speed = None
+    @property
+    def x(self):
+        raise NotImplementedException()
+
+    @x.setter
+    def x_setter(self, value):
+        raise NotImplementedException()
+
+    @property
+    def speed(self):
+        raise NotImplementedException()
+
+    @x.setter
+    def speed_setter(self, value):
+        raise NotImplementedException()
+
+    @property
+    def health(self):
+        raise NotImplementedException()
+
+    @x.setter
+    def health_setter(self, value):
+        raise NotImplementedException()
+
+    @property
+    def damage(self):
+        raise NotImplementedException()
+
+    @x.setter
+    def damage_setter(self, value):
+        raise NotImplementedException()
 
     def move_forward(self):
         raise NotImplementedException()
@@ -16,11 +42,42 @@ class UnitInterface(object):
 class Unit(UnitInterface):
 
     def __init__(self):
-        super(Unit, self).__init__()
-        self.x = 0
-        self.health = 100
-        self.damage = 10
-        self.speed = 5
+        self._x = 0
+        self._speed = 5
+        self._health = 100
+        self._damage = 10
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x_setter(self, value):
+        self._x = value
+
+    @property
+    def speed(self):
+        return self._speed
+
+    @x.setter
+    def speed_setter(self, value):
+        self._speed = value
+
+    @property
+    def health(self):
+        return self._speed
+
+    @x.setter
+    def health_setter(self, value):
+        self._health = value
+
+    @property
+    def damage(self):
+        return self._damage
+
+    @x.setter
+    def damage_setter(self, value):
+        self._damage = value
 
     def move_forward(self):
         self.x += self.speed
@@ -28,10 +85,9 @@ class Unit(UnitInterface):
     def attack(self, unit):
         unit.health -= self.damage
 
-def HealBuff(UnitInterface):
+class HealBuff(UnitInterface):
 
     def __init__(self, unit):
-        print('construc')
         self._unit = unit
 
     @property
@@ -41,6 +97,30 @@ def HealBuff(UnitInterface):
     @x.setter
     def x_setter(self, value):
         self._unit.x = value
+
+    @property
+    def speed(self):
+        return self._unit.speed
+
+    @x.setter
+    def speed_setter(self, value):
+        self._unit.speed = value
+
+    @property
+    def health(self):
+        return self._unit.health
+
+    @x.setter
+    def health_setter(self, value):
+        self._unit.health = value
+
+    @property
+    def damage(self):
+        return self._unit.damage
+
+    @x.setter
+    def damage_setter(self, value):
+        self._unit.damage = value
 
     def attack(self, unit):
         self._unit.attack(unit)
