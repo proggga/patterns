@@ -1,125 +1,156 @@
+"""UnitInterface, Unit class, BufferedUnitDecorator and Buffs"""
+import random
+
 
 class UnitInterface(object):
+    """UnitInterface which allow user"""
+
+    def debuff(self):
+        """Should return unit without last buff"""
+        raise NotImplementedError()
 
     @property
-    def x(self):
-        raise NotImplementedException()
+    def coordinate(self):
+        """x coordinate getter"""
+        raise NotImplementedError()
 
-    @x.setter
-    def x_setter(self, value):
-        raise NotImplementedException()
+    @coordinate.setter
+    def coordinate(self, value):
+        """coordinate setter"""
+        raise NotImplementedError()
 
     @property
     def speed(self):
-        raise NotImplementedException()
+        """move speed getter"""
+        raise NotImplementedError()
 
-    @x.setter
-    def speed_setter(self, value):
-        raise NotImplementedException()
+    @speed.setter
+    def speed(self, value):
+        """move speed setter"""
+        raise NotImplementedError()
 
     @property
     def health(self):
-        raise NotImplementedException()
+        """health getter"""
+        raise NotImplementedError()
 
-    @x.setter
-    def health_setter(self, value):
-        raise NotImplementedException()
+    @health.setter
+    def health(self, value):
+        """health setter"""
+        raise NotImplementedError()
 
     @property
     def damage(self):
-        raise NotImplementedException()
+        """damage getter"""
+        raise NotImplementedError()
 
-    @x.setter
-    def damage_setter(self, value):
-        raise NotImplementedException()
+    @damage.setter
+    def damage(self, value):
+        """damage setter"""
+        raise NotImplementedError()
 
     def move_forward(self):
-        raise NotImplementedException()
+        """move forward"""
+        raise NotImplementedError()
 
-    def attack(self):
-        raise NotImplementedException()
+    def attack(self, unit):
+        """attack unit"""
+        raise NotImplementedError()
+
 
 class Unit(UnitInterface):
+    """Common Unit Class"""
 
     def __init__(self):
         self._x = 0
         self._speed = 5
         self._health = 100
+        self._max_health = 100
         self._damage = 10
 
+    def debuff(self):
+        return self
+
     @property
-    def x(self):
+    def coordinate(self):
         return self._x
 
-    @x.setter
-    def x_setter(self, value):
+    @coordinate.setter
+    def coordinate(self, value):
         self._x = value
 
     @property
     def speed(self):
         return self._speed
 
-    @x.setter
-    def speed_setter(self, value):
+    @speed.setter
+    def speed(self, value):
         self._speed = value
 
     @property
     def health(self):
-        return self._speed
+        return self._health
 
-    @x.setter
-    def health_setter(self, value):
+    @health.setter
+    def health(self, value):
+        if value > self._max_health:
+            value = self._max_health
         self._health = value
 
     @property
     def damage(self):
         return self._damage
 
-    @x.setter
-    def damage_setter(self, value):
+    @damage.setter
+    def damage(self, value):
         self._damage = value
 
     def move_forward(self):
-        self.x += self.speed
+        self.coordinate += self.speed
 
     def attack(self, unit):
         unit.health -= self.damage
 
-class HealBuff(UnitInterface):
+
+class BufferedUnitDecorator(UnitInterface):
+    """Common Decorator for Buffs"""
 
     def __init__(self, unit):
         self._unit = unit
 
-    @property
-    def x(self):
-        return self._unit.x
+    def debuff(self):
+        return self._unit
 
-    @x.setter
-    def x_setter(self, value):
-        self._unit.x = value
+    @property
+    def coordinate(self):
+        return self._unit.coordinate
+
+    @coordinate.setter
+    def coordinate(self, value):
+        self._unit.coordinate = value
 
     @property
     def speed(self):
         return self._unit.speed
 
-    @x.setter
-    def speed_setter(self, value):
+    @speed.setter
+    def speed(self, value):
         self._unit.speed = value
 
     @property
     def health(self):
         return self._unit.health
 
-    @x.setter
-    def health_setter(self, value):
+    @health.setter
+    def health(self, value):
         self._unit.health = value
 
     @property
     def damage(self):
         return self._unit.damage
 
-    @x.setter
-    def damage_setter(self, value):
+    @damage.setter
+    def damage(self, value):
         self._unit.damage = value
 
     def attack(self, unit):
@@ -127,4 +158,19 @@ class HealBuff(UnitInterface):
 
     def move_forward(self):
         self._unit.move_forward()
+
+
+class HealWhenMoveBuff(BufferedUnitDecorator):
+    """Heal unit after move"""
+
+    def move_forward(self):
+        super(HealWhenMoveBuff, self).move_forward()
         self._unit.health += 10
+
+
+class DamageWhenAttackCurse(BufferedUnitDecorator):
+    """Damage to unit before attack"""
+
+    def attack(self, unit):
+        self._unit.health -= random.randint(3, 10)
+        super(DamageWhenAttackCurse, self).attack(unit)
