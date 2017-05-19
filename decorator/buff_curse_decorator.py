@@ -1,6 +1,6 @@
 """Main Buff and Curse decorator for Unit"""
-from decorator.unit_interface import UnitInterface
 from decorator.helpers import raise_if_dead
+from decorator.unit_interface import UnitInterface
 
 
 class BuffCurseUnitDecorator(UnitInterface):

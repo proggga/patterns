@@ -1,14 +1,17 @@
 """Test Unit class, and then decorator"""
 import unittest
-from decorator.unit import Unit
-from decorator.buff_curse_decorator import BuffCurseUnitDecorator
-from decorator.exceptions import UnitDeadException
-
-from decorator.buffs.heal_on_move import HealOnMoveBuff
-from decorator.curses.damage_before_attack import DamageWhenAttackCurse
-from decorator.buffs.zombie import ZombieBuff
 
 import mock
+
+from decorator.buff_curse_decorator import BuffCurseUnitDecorator
+from decorator.unit import Unit
+
+from decorator.buffs.heal_on_move import HealOnMoveBuff
+from decorator.buffs.zombie import ZombieBuff
+from decorator.curses.damage_before_attack import DamageWhenAttackCurse
+
+from decorator.exceptions import UnitDeadException
+from decorator.exceptions import UnitIsNotDeadException
 
 
 class TestUnitClass(unittest.TestCase):
@@ -43,15 +46,6 @@ class TestUnitClass(unittest.TestCase):
         self.assertEqual(unit1.coordinate, 7)
 
     def test_unit_dead(self):
-        """test class pls"""
-        unit1 = Unit()
-        unit1.health -= 100
-        with self.assertRaises(UnitDeadException):
-            unit1.move_forward()
-        with self.assertRaises(UnitDeadException):
-            unit1.attack(unit1)
-
-    def test_unit_dead(self):
         """test unit is dead"""
         unit1 = Unit()
         unit2 = Unit()
@@ -73,6 +67,11 @@ class TestUnitClass(unittest.TestCase):
         except UnitDeadException:
             self.fail("Should not raise UnitDeadException,"
                       " because he is Zombie")
+
+    def test_zombie_fails(self):
+        """ZombieBuff should fail if unit is not dead"""
+        with self.assertRaises(UnitIsNotDeadException):
+            ZombieBuff(Unit())
 
     def test_attack(self):
         """Test unit can attack another unit"""
@@ -136,7 +135,8 @@ class TestUnitClass(unittest.TestCase):
         self.assertEqual(unit1.health, 100)
         self.assertEqual(unit2.health, 90)
         unit1 = DamageWhenAttackCurse(unit1)
-        with mock.patch('decorator.unit.random.randint') as mock_method:
+        random_path = 'decorator.curses.damage_before_attack.random.randint'
+        with mock.patch(random_path) as mock_method:
             mock_method.return_value = 7
             unit1.attack(unit2)
         self.assertEqual(unit1.health, 93)
@@ -147,12 +147,14 @@ class TestUnitClass(unittest.TestCase):
         self.assertEqual(unit2.health, 70)
 
     def test_two_decorators(self):
+        """Test two decorators interactions"""
         unit1 = Unit()
         unit2 = Unit()
         unit1 = HealOnMoveBuff(unit1)
         unit1 = DamageWhenAttackCurse(unit1)
 
-        with mock.patch('decorator.unit.random.randint') as mock_method:
+        random_path = 'decorator.curses.damage_before_attack.random.randint'
+        with mock.patch(random_path) as mock_method:
             mock_method.return_value = 6
             unit1.attack(unit2)
         self.assertEqual(unit1.health, 94)
@@ -161,14 +163,14 @@ class TestUnitClass(unittest.TestCase):
         unit1.move_forward()
         self.assertEqual(unit1.health, 100)
 
-        with mock.patch('decorator.unit.random.randint') as mock_method:
+        with mock.patch(random_path) as mock_method:
             mock_method.return_value = 4
             unit1.attack(unit2)
         self.assertEqual(unit1.health, 96)
         self.assertEqual(unit2.health, 80)
 
         unit1 = unit1.debuff()
-        with mock.patch('decorator.unit.random.randint') as mock_method:
+        with mock.patch(random_path) as mock_method:
             mock_method.return_value = 9
             unit1.attack(unit2)
         self.assertEqual(unit1.health, 96)

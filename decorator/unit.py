@@ -1,8 +1,6 @@
 """UnitInterface, Unit class, BuffCurseUnitDecorator and Buffs"""
-import random
-from decorator.unit_interface import UnitInterface
 from decorator.helpers import raise_if_dead
-from decorator.buff_curse_decorator import BuffCurseUnitDecorator
+from decorator.unit_interface import UnitInterface
 
 
 class Unit(UnitInterface):
