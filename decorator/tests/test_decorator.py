@@ -1,11 +1,12 @@
 """Test Unit class, and then decorator"""
 import unittest
 from decorator.unit import Unit
-from decorator.unit import BufferedUnitDecorator
-from decorator.unit import HealWhenMoveBuff
-from decorator.unit import DamageWhenAttackCurse
-from decorator.unit import UnitDeadException
-from decorator.unit import ZombieBuff
+from decorator.buff_curse_decorator import BuffCurseUnitDecorator
+from decorator.exceptions import UnitDeadException
+
+from decorator.buffs.heal_on_move import HealOnMoveBuff
+from decorator.curses.damage_before_attack import DamageWhenAttackCurse
+from decorator.buffs.zombie import ZombieBuff
 
 import mock
 
@@ -86,7 +87,7 @@ class TestUnitClass(unittest.TestCase):
         """Test decorator work same as unit"""
         unit1 = Unit()
         unit2 = Unit()
-        unit1 = BufferedUnitDecorator(unit1)
+        unit1 = BuffCurseUnitDecorator(unit1)
         self.assertEqual(unit1.coordinate, 0)
         self.assertEqual(unit1.health, 100)
         self.assertEqual(unit1.speed, 5)
@@ -105,7 +106,7 @@ class TestUnitClass(unittest.TestCase):
         unit1.attack(unit2)
         unit1.attack(unit2)
         unit1.attack(unit2)
-        unit2 = HealWhenMoveBuff(unit2)
+        unit2 = HealOnMoveBuff(unit2)
         self.assertEqual(unit2.health, 70)
         unit2.move_forward()
         self.assertEqual(unit2.health, 80)
@@ -120,7 +121,7 @@ class TestUnitClass(unittest.TestCase):
         """test debuff works"""
         unit1 = Unit()
         unit1.health = 50
-        unit1 = HealWhenMoveBuff(unit1)
+        unit1 = HealOnMoveBuff(unit1)
         unit1.move_forward()
         self.assertEqual(unit1.health, 60)
         unit1 = unit1.debuff()
@@ -148,7 +149,7 @@ class TestUnitClass(unittest.TestCase):
     def test_two_decorators(self):
         unit1 = Unit()
         unit2 = Unit()
-        unit1 = HealWhenMoveBuff(unit1)
+        unit1 = HealOnMoveBuff(unit1)
         unit1 = DamageWhenAttackCurse(unit1)
 
         with mock.patch('decorator.unit.random.randint') as mock_method:
