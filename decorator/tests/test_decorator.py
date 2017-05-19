@@ -4,6 +4,8 @@ from decorator.unit import Unit
 from decorator.unit import BufferedUnitDecorator
 from decorator.unit import HealWhenMoveBuff
 from decorator.unit import DamageWhenAttackCurse
+from decorator.unit import UnitDeadException
+from decorator.unit import ZombieBuff
 
 import mock
 
@@ -38,6 +40,38 @@ class TestUnitClass(unittest.TestCase):
         unit1.speed = 2
         unit1.move_forward()
         self.assertEqual(unit1.coordinate, 7)
+
+    def test_unit_dead(self):
+        """test class pls"""
+        unit1 = Unit()
+        unit1.health -= 100
+        with self.assertRaises(UnitDeadException):
+            unit1.move_forward()
+        with self.assertRaises(UnitDeadException):
+            unit1.attack(unit1)
+
+    def test_unit_dead(self):
+        """test unit is dead"""
+        unit1 = Unit()
+        unit2 = Unit()
+        unit1.health -= 100
+        with self.assertRaises(UnitDeadException):
+            unit1.move_forward()
+        with self.assertRaises(UnitDeadException):
+            unit1.attack(unit2)
+
+    def test_unit_zombie(self):
+        """test unit is zombie, but dead too"""
+        unit1 = Unit()
+        unit1.health -= 100
+        with self.assertRaises(UnitDeadException):
+            unit1.move_forward()
+        unit1 = ZombieBuff(unit1)
+        try:
+            unit1.move_forward()
+        except UnitDeadException:
+            self.fail("Should not raise UnitDeadException,"
+                      " because he is Zombie")
 
     def test_attack(self):
         """Test unit can attack another unit"""

@@ -2,6 +2,22 @@
 import random
 
 
+class UnitDeadException(Exception):
+    """Exception when try to do something when unit is dead"""
+    pass
+
+
+def raise_if_dead(decorate_method):
+    """decorator method"""
+    def check_function(*args, **kwargs):
+        """decorated method body"""
+        unit = args[0]
+        if unit.health == 0:
+            raise UnitDeadException("Unit is dead")
+        return decorate_method(*args, **kwargs)
+    return check_function
+
+
 class UnitInterface(object):
     """UnitInterface which allow user"""
 
@@ -95,6 +111,8 @@ class Unit(UnitInterface):
     def health(self, value):
         if value > self._max_health:
             value = self._max_health
+        if value < 0:
+            value = 0
         self._health = value
 
     @property
@@ -105,9 +123,11 @@ class Unit(UnitInterface):
     def damage(self, value):
         self._damage = value
 
+    @raise_if_dead
     def move_forward(self):
         self.coordinate += self.speed
 
+    @raise_if_dead
     def attack(self, unit):
         unit.health -= self.damage
 
@@ -153,9 +173,11 @@ class BufferedUnitDecorator(UnitInterface):
     def damage(self, value):
         self._unit.damage = value
 
+    @raise_if_dead
     def attack(self, unit):
         self._unit.attack(unit)
 
+    @raise_if_dead
     def move_forward(self):
         self._unit.move_forward()
 
@@ -163,14 +185,34 @@ class BufferedUnitDecorator(UnitInterface):
 class HealWhenMoveBuff(BufferedUnitDecorator):
     """Heal unit after move"""
 
+    @raise_if_dead
     def move_forward(self):
         super(HealWhenMoveBuff, self).move_forward()
-        self._unit.health += 10
+        self.health += 10
 
 
 class DamageWhenAttackCurse(BufferedUnitDecorator):
     """Damage to unit before attack"""
 
+    @raise_if_dead
     def attack(self, unit):
-        self._unit.health -= random.randint(3, 10)
+        self.health -= random.randint(3, 10)
         super(DamageWhenAttackCurse, self).attack(unit)
+
+
+class ZombieBuff(BufferedUnitDecorator):
+    """Heal unit after move"""
+
+    def __init__(self, unit):
+        super(ZombieBuff, self).__init__(unit)
+        self._unit.health = 0
+
+    def move_forward(self):
+        self._unit.health = 1
+        self._unit.move_forward()
+        self._unit.health = 0
+
+    def attack(self, unit):
+        self._unit.health = 1
+        self._unit.attack(unit)
+        self._unit.health = 0
